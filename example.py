@@ -63,7 +63,7 @@ if __name__ == '__main__':
     tolerance = 10
 
     model_prosac = PROSAC(data, distances, LinearModel, tolerance, beta=0.10)
-    model_ransac = RANSAC(data, LinearModel, tolerance, inliers * 0.75 / (inliers + outliers))
+    model_ransac = RANSAC(data, LinearModel, tolerance, inliers * 0.75 / (inliers + outliers), 0.8)
 
     plt.plot(range(10), [model_prosac.predict(x) for x in range(10)], c='magenta', label='PROSAC')
     plt.plot(range(10), [model_ransac.predict(x) for x in range(10)], c='r', label='RANSAC')

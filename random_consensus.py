@@ -24,9 +24,7 @@ class Model(ABC):
         ...
 
 
-def RANSAC(data, modelType, tolerance, prob_inlier, min_correct_model=None):
-    if min_correct_model is None:
-        min_correct_model = prob_inlier
+def RANSAC(data, modelType, tolerance, prob_inlier, min_ratio_correct_model):
     m = modelType.get_complexity()
     best_num_inliers = 0
     n = data.shape[0]
@@ -37,6 +35,9 @@ def RANSAC(data, modelType, tolerance, prob_inlier, min_correct_model=None):
         model.fit(pts)
         error = model.error(data)
         num_inliers = (error < tolerance).sum()
+        if num_inliers / (n) > min_ratio_correct_model:
+            inliers = data[error < tolerance]
+            break
         if num_inliers > best_num_inliers:
             best_num_inliers = num_inliers
             inliers = data[error < tolerance]
