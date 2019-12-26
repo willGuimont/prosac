@@ -34,17 +34,17 @@ def generate_data(f, n, outliers):
     data = np.zeros((n + outliers, 2))
     x_range = 0, 10
     y_range = f(x_range[0]), f(x_range[1])
-    distances = []
+    quality = []
     for i in range(n):
         x = np.random.uniform(*x_range)
         data[i] = [x, f(x) + np.random.randn() * noise]
-        distances.append(abs(np.random.randn()))
+        quality.append(1 / abs(np.random.randn()))
     for i in range(outliers):
         x = np.random.uniform(*x_range)
         y = np.random.uniform(*y_range)
         data[n + i] = [x, y]
-        distances.append(abs(np.random.randn() * 2 + 5))
-    return data, distances, x_range, y_range
+        quality.append(1 / abs(np.random.randn() * 2 + 5))
+    return data, quality, x_range, y_range
 
 
 if __name__ == '__main__':
@@ -58,11 +58,11 @@ if __name__ == '__main__':
 
     inliers = 100
     outliers = 100
-    data, distances, x_range, y_range = generate_data(f, inliers, outliers)
+    data, quality, x_range, y_range = generate_data(f, inliers, outliers)
 
     tolerance = 10
 
-    model_prosac = PROSAC(data, distances, LinearModel, tolerance, beta=0.10)
+    model_prosac = PROSAC(data, quality, LinearModel, tolerance, beta=0.10)
     model_ransac = RANSAC(data, LinearModel, tolerance, inliers * 0.75 / (inliers + outliers), 0.8)
 
     plt.plot(range(10), [model_prosac.predict(x) for x in range(10)], c='magenta', label='PROSAC')

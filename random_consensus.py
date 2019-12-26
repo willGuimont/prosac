@@ -48,9 +48,9 @@ def RANSAC(data, modelType, tolerance, prob_inlier, min_ratio_correct_model):
     return model
 
 
-def PROSAC(data, distances, modelType, tolerance, beta, phi=0.05, eta=0.05):
-    indexes = np.argsort(distances)
-    data = data[indexes]
+def PROSAC(data, quality, modelType, tolerance, beta, phi=0.05, eta=0.05):
+    indexes = np.argsort(quality)
+    data = data[::-1][indexes]
 
     N = data.shape[0]
     m = modelType.get_complexity()
