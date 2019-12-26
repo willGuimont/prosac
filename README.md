@@ -1,1 +1,1 @@
-# PROSAC algorithm in python
+# RANSAC and PROSAC algorithms in python
