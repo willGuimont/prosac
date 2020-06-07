@@ -32,8 +32,8 @@ class LinearModel(Model):
 def generate_data(f, n, outliers):
     noise = 2
     data = np.zeros((n + outliers, 2))
-    x_range = 0, 10
-    y_range = f(x_range[0]), f(x_range[1])
+    x_range = [0, 10]
+    y_range = sorted([f(x_range[0]), f(x_range[1])])
     quality = []
     for i in range(n):
         x = np.random.uniform(*x_range)
@@ -60,10 +60,22 @@ if __name__ == '__main__':
     outliers = 100
     data, quality, x_range, y_range = generate_data(f, inliers, outliers)
 
-    tolerance = 10
+    x_min, x_max = x_range
+    y_min, y_max = y_range
 
-    model_prosac = PROSAC(data, quality, LinearModel, tolerance, beta=0.10)
-    model_ransac = RANSAC(data, LinearModel, tolerance, inliers * 0.75 / (inliers + outliers), 0.8)
+    tolerance = 3
+
+    # Base from data ranges and tolerance, a point has beta probability of being supported by an incorrect model
+    data_area = (x_max - x_min) * (y_max - y_min)
+    max_line_length = np.sqrt((x_max - x_min) ** 2 + (y_max - y_min) ** 2)
+    tolerance_area = max_line_length * tolerance
+
+    beta = (tolerance_area / data_area) * 1.1  # add 10% to be more pessimist
+
+    model_prosac = PROSAC(data, quality, LinearModel, tolerance, beta=beta)
+    # The value can be hard to estimate, it is better to underestimate the value
+    prob_inlier = inliers * 0.5 / (inliers + outliers)
+    model_ransac = RANSAC(data, LinearModel, tolerance, prob_inlier=prob_inlier, min_ratio_correct_model=0.8)
 
     plt.plot(range(10), [model_prosac.predict(x) for x in range(10)], c='magenta', label='PROSAC')
     plt.plot(range(10), [model_ransac.predict(x) for x in range(10)], c='r', label='RANSAC')

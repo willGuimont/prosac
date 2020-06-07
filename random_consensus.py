@@ -29,13 +29,14 @@ def RANSAC(data, modelType, tolerance, prob_inlier, min_ratio_correct_model):
     best_num_inliers = 0
     n = data.shape[0]
     max_times = int(np.ceil(1 / (prob_inlier ** m)))
+    inliers = []
     for _ in range(max_times):
         pts = data[random.sample(range(n), m)]
         model = modelType()
         model.fit(pts)
         error = model.error(data)
         num_inliers = (error < tolerance).sum()
-        if num_inliers / (n) > min_ratio_correct_model:
+        if num_inliers / n > min_ratio_correct_model:
             inliers = data[error < tolerance]
             break
         if num_inliers > best_num_inliers:
