@@ -67,9 +67,9 @@ def PROSAC(data, quality, modelType, tolerance, beta, phi=0.05, eta=0.05):
             Tn_1 = Tn * (n + 1) / (n + 1 - m)
             Tn_prime = Tn_prime + np.ceil(Tn_1 - Tn)
             Tn = Tn_1
-            n += 1
+            n = min(n + 1, N)
         # 2. Semi-random sample M of size m
-        if Tn_prime < t:
+        if t < Tn_prime:
             pts_idx = [n] + random.sample(range(n - 1), m - 1)
         else:
             pts_idx = random.sample(range(n), m)
