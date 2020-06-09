@@ -1,16 +1,15 @@
 def prosac(sorted_matches):
-    # Adapted from: http://devernay.free.fr/vision/src/prosac.c	
     # TODO: move this distCoeffs out!
     distCoeffs = np.zeros((5, 1))  # assume zero for now
 
     CORRESPONDENCES = sorted_matches.shape[0]
-    # isInlier = np.zeros([1,CORRESPONDENCES])
+    isInlier = np.zeros([1,CORRESPONDENCES])
     SAMPLE_SIZE = 4
     MAX_OUTLIERS_PROPORTION = 0.8
     P_GOOD_SAMPLE = 0.99
     TEST_NB_OF_DRAWS = 60000
     TEST_INLIERS_RATIO = 0.5
-    BETA = 0.1
+    BETA = 0.01
     ETA0 = 0.05
 
     def niter_RANSAC(p, epsilon, s, Nmax):
@@ -25,13 +24,18 @@ def prosac(sorted_matches):
         N = np.log(1 - p) / logval
         if(logval < 0 and N < Nmax):
             return np.ceil(N)
-
         return Nmax
 
     def Imin(m, n, beta):
         mu = n*beta
         sigma = np.sqrt(n * beta * (1 - beta))
         return  np.ceil(m + mu + sigma * np.sqrt(2.706))
+
+    def findSupport(n, isInlier):
+        total_inliers = 0
+        for i in range(0,n):
+            total_inliers = total_inliers + isInlier[0,i]
+        return total_inliers, isInlier
 
     N = CORRESPONDENCES
     m = SAMPLE_SIZE
@@ -97,9 +101,10 @@ def prosac(sorted_matches):
             img_point_est = img_point_est / img_point_est[2]  # divide by last coordinate
             dist = np.linalg.norm(img_point_gt - img_point_est[0:2])
             if (dist < 8.0):
+                isInlier[0,i] = 1
                 inliers.append(sorted_matches[i])
 
-        I_N = len(inliers)
+        I_N, isInlier = findSupport(N, isInlier)
         # print("found {0} inliers!\n".format(I_N))
 
         if(I_N > I_N_best):
@@ -108,19 +113,19 @@ def prosac(sorted_matches):
             I_n_best = I_N
             best_model = model
 
-            # I_n_test = I_N
-            # if(1):
-            #     epsilon_n_best = I_n_best / n_best
-            #     for n_test in range(N, m, -1):
-            #         if (not (n_test >= I_n_test)):
-            #             print("C++ Assertion failed - 3")
-            #         if ( (I_n_test * n_best > I_n_best * n_test) and (I_n_test > epsilon_n_best * n_test + np.sqrt(n_test * epsilon_n_best * (1 - epsilon_n_best) * 2.706) ) ):
-            #             if (I_n_test < Imin(m, n_test, beta)):
-            #                 break
-            #             n_best = n_test
-            #             I_n_best = I_n_test
-            #             epsilon_n_best = I_n_best / n_best
-            #     I_n_test = I_n_test - isInlier[n_test - 1]
+            if(1):
+                epsilon_n_best = I_n_best / n_best
+                I_n_test = I_N
+                for n_test in range(N, m, -1):
+                    if (not (n_test >= I_n_test)):
+                        print("C++ Assertion failed - 3")
+                    if ( (I_n_test * n_best > I_n_best * n_test) and (I_n_test > epsilon_n_best * n_test + np.sqrt(n_test * epsilon_n_best * (1 - epsilon_n_best) * 2.706) )):
+                        if (I_n_test < Imin(m, n_test, beta)):
+                            break
+                        n_best = n_test
+                        I_n_best = I_n_test
+                        epsilon_n_best = I_n_best / n_best
+                    I_n_test = I_n_test - isInlier[0, n_test - 1]
 
             if (I_n_best * n_star > I_n_star * n_best):
                 if(not (n_best >= I_n_best)):
