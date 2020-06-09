@@ -1,4 +1,5 @@
 def prosac(sorted_matches):
+    # adapted from: http://devernay.free.fr/vision/src/prosac.c 
     # TODO: move this distCoeffs out!
     distCoeffs = np.zeros((5, 1))  # assume zero for now
 
