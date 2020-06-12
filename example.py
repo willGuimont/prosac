@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy import stats
 
-from random_consensus import Model, PROSAC, RANSAC
+from random_consensus import Model, prosac, ransac
 
 
 class LinearModel(Model):
@@ -72,10 +72,13 @@ if __name__ == '__main__':
 
     beta = (tolerance_area / data_area) * 1.1  # add 10% to be more pessimist
 
-    model_prosac = PROSAC(data, quality, LinearModel, tolerance, beta=beta)
+    model_prosac = prosac(data, quality, LinearModel, tolerance, beta,
+                          eta0=0.05, psi=0.05, max_outlier_proportion=0.5,
+                          p_good_sample=0.99, max_number_of_draws=60_000,
+                          enable_n_star_optimization=True)
     # The value can be hard to estimate, it is better to underestimate the value
     prob_inlier = inliers * 0.5 / (inliers + outliers)
-    model_ransac = RANSAC(data, LinearModel, tolerance, prob_inlier=prob_inlier, min_ratio_correct_model=0.8)
+    model_ransac = ransac(data, LinearModel, tolerance, prob_inlier=prob_inlier, satisfactory_inlier_ratio=0.8)
 
     plt.plot(range(10), [model_prosac.predict(x) for x in range(10)], c='magenta', label='PROSAC')
     plt.plot(range(10), [model_ransac.predict(x) for x in range(10)], c='r', label='RANSAC')
