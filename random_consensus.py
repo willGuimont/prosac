@@ -24,20 +24,23 @@ class Model(ABC):
         ...
 
 
-def ransac(data, model_type, tolerance, prob_inlier, satisfactory_inlier_ratio):
+def ransac(data, model_type, tolerance, prob_inlier, p=0.99):
     """
     Random sample consensus (RANSAC)
     :param data: Data to fit
     :param model_type: Model subclass
     :param tolerance: Tolerance on the error to consider a point inlier to a model
     :param prob_inlier: Probability that a point is an inlier (inliers / (inliers + outliers))
-    :param satisfactory_inlier_ratio: Early exit if a model has a higher ratio of inliers than satisfactory_inlier_ratio
+    :param p: Desired probability that there is at least one good sample
     :return: A model of type model_type, fitted to the inliers
     """
     m = model_type.get_complexity()
     best_num_inliers = 0
     n = data.shape[0]
-    max_times = int(np.ceil(1 / (prob_inlier ** m)))
+    outlier_proportion = 1 - prob_inlier
+    max_times = int(np.ceil(np.log(1 - p) / np.log(1 - (1 - outlier_proportion) ** m)))
+    satisfactory_inlier_ratio = prob_inlier * n
+
     inliers = []
     for _ in range(max_times):
         pts = data[random.sample(range(n), m)]

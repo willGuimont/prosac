@@ -70,15 +70,19 @@ if __name__ == '__main__':
     max_line_length = np.sqrt((x_max - x_min) ** 2 + (y_max - y_min) ** 2)
     tolerance_area = max_line_length * tolerance
 
-    beta = (tolerance_area / data_area) * 1.1  # add 10% to be more pessimist
-
-    model_prosac = prosac(data, quality, LinearModel, tolerance, beta,
-                          eta0=0.05, psi=0.05, max_outlier_proportion=0.5,
-                          p_good_sample=0.99, max_number_of_draws=60_000,
-                          enable_n_star_optimization=True)
     # The value can be hard to estimate, it is better to underestimate the value
-    prob_inlier = inliers * 0.5 / (inliers + outliers)
-    model_ransac = ransac(data, LinearModel, tolerance, prob_inlier=prob_inlier, satisfactory_inlier_ratio=0.8)
+    prob_inlier = inliers / (inliers + outliers) * 0.9
+
+    # Desired probability that there is at least one good sample
+    p = 0.99
+
+    beta = (tolerance_area / data_area) * 1.1  # add 10% to be more pessimist
+    model_prosac = prosac(data, quality, LinearModel, tolerance, beta,
+                          eta0=0.05, psi=0.05, max_outlier_proportion=(1 - prob_inlier),
+                          p_good_sample=p, max_number_of_draws=60_000,
+                          enable_n_star_optimization=True)
+
+    model_ransac = ransac(data, LinearModel, tolerance, prob_inlier=prob_inlier, p=p)
 
     plt.plot(range(10), [model_prosac.predict(x) for x in range(10)], c='magenta', label='PROSAC')
     plt.plot(range(10), [model_ransac.predict(x) for x in range(10)], c='r', label='RANSAC')
