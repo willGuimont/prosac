@@ -37,8 +37,7 @@ def ransac(data, model_type, tolerance, prob_inlier, p=0.99):
     m = model_type.get_complexity()
     best_num_inliers = 0
     n = data.shape[0]
-    outlier_proportion = 1 - prob_inlier
-    max_times = int(np.ceil(np.log(1 - p) / np.log(1 - (1 - outlier_proportion) ** m)))
+    max_times = int(np.ceil(np.log(1 - p) / np.log(1 - prob_inlier ** m)))
     satisfactory_inlier_ratio = prob_inlier * n
 
     inliers = []
