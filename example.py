@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy import stats
 
-from random_consensus import Model, prosac, ransac
+from prosac.random_consensus import Model, prosac, ransac
 
 
 class LinearModel(Model):
