@@ -4,7 +4,7 @@ This package provides an implementation of the RANSAC and PROSAC algorithms in P
 This implementation draws inspiration from [prosac.c](http://devernay.free.fr/vision/src/prosac.c).
 
 Explanation of the PROSAC algorithm can be found
-at: [https://willguimont.com/blog/prosac-algorithm/](https://willguimont.com/blog/prosac-algorithm/)
+at: [willguimont.com/blog/prosac-algorithm/](https://willguimont.com/blog/prosac-algorithm/) and [PROSAC](https://willguimont.com/projects/prosac/).
 
 ## Installation
 
